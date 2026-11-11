@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 PDCA Collect - Gestion Agricole</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <header class="header">
+            <h1><i class="fas fa-clipboard-check"></i> PDCA Collect</h1>
+            <p class="subtitle">Système de collecte des données agricoles</p>
+            <div class="top-controls"><button id="langToggle" class="top-btn">العربية</button><span class="version-tag">Version 2.0</span></div>
+        </header>
+
+        <nav class="main-nav">
+            <button class="nav-btn active" data-panel="dashboardPanel">📊 Tableau de bord</button>
+            <button class="nav-btn" data-panel="recordsPanel">📝 Collecte des données</button>
+        </nav>
+        <section id="dashboardPanel" class="dashboard-panel">
+            <div class="dashboard-head"><div><h2>📊 Tableau de bord statistique</h2><p>Indicateurs calculés à partir des fiches enregistrées sur cet appareil.</p></div>
+                <select id="statsPeriod"><option value="day">Aujourd'hui</option><option value="week">7 derniers jours</option><option value="month" selected>30 derniers jours</option><option value="all">Toutes les dates</option></select>
+            </div>
+            <div class="kpi-grid">
+                <article class="kpi"><span>Total agriculteurs</span><strong id="kpiFarmers">0</strong></article>
+                <article class="kpi"><span>Total coopératives</span><strong id="kpiCoops">0</strong></article>
+                <article class="kpi"><span>Saisies sur la période</span><strong id="kpiPeriod">0</strong></article>
+                <article class="kpi"><span>Fiches géolocalisées</span><strong id="kpiGps">0</strong></article>
+            </div>
+            <div class="dashboard-grid">
+                <article class="dash-card"><h3>Évolution des saisies (7 jours)</h3><div id="dailyChart" class="bar-chart"></div></article>
+                <article class="dash-card"><h3>Répartition par type</h3><div id="typeChart" class="type-chart"></div><p id="legacyNote" class="legacy-note"></p></article>
+            </div>
+            <div class="dash-card commune-card"><h3>Répartition des agriculteurs par commune</h3><div id="communeStats"></div></div>
+            <p class="offline-note">✓ Statistiques disponibles hors connexion. Les anciennes fiches sans date de saisie sont comptées dans les totaux, mais pas dans les statistiques journalières.</p>
+        </section>
+        <div id="recordsPanel" class="records-panel">
+        <!-- Sélection du type -->
+        <section class="type-section">
+            <div class="type-selector">
+                <button id="btnAgriculteur" class="type-btn type-active">
+                    <i class="fas fa-user"></i> Agriculteurs
+                </button>
+                <button id="btnCooperative" class="type-btn">
+                    <i class="fas fa-users"></i> Coopératives
+                </button>
+            </div>
+        </section>
+
+        <!-- Formulaire Agriculteur -->
+        <section id="formAgriculteur" class="form-section active-form">
+            <h2><i class="fas fa-edit"></i> Formulaire d'inscription - Agriculteurs</h2>
+            
+            <form id="agriculteurForm">
+            <div class="pdca-voice-toolbar" data-voice-toolbar>
+                <label>Langue vocale / لغة الإدخال
+                    <select class="pdca-voice-language" aria-label="Langue de reconnaissance vocale">
+                        <option value="fr">Français</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </label>
+                <button type="button" class="pdca-model-install" data-model-install>⬇ Installer le modèle sur ce téléphone</button>
+                <span class="pdca-voice-status" aria-live="polite">Voix hors connexion : modèle à installer</span>
+            </div>
+
+                <div class="form-grid">
+                    <!-- Colonne 1 -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="nom">Nom *</label>
+                            <input type="text" id="nom" placeholder="Ex: Benmohammed" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="prenom">Prénom *</label>
+                            <input type="text" id="prenom" placeholder="Ex: Mina" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cin">CIN *</label>
+                            <input type="text" id="cin" placeholder="Ex: AB0099" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Genre *</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="genre" value="m" checked>
+                                    <span class="radio-custom"></span>
+                                    Homme (m)
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="genre" value="f">
+                                    <span class="radio-custom"></span>
+                                    Femme (f)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="date_naissance">Date de naissance *</label>
+                            <input type="text" id="date_naissance" placeholder="JJ/MM/AAAA (Ex: 03/09/1980)" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Colonne 2 -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="adresse">Adresse</label>
+                            <input type="text" id="adresse" placeholder="Adresse complète">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="telephone">Téléphone *</label>
+                            <input type="tel" id="telephone" placeholder="Ex: 600000000" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Coordonnées</label>
+                            <div class="coords-group">
+                                <div class="coord-input">
+                                    <label for="x">X:</label>
+                                    <input type="text" id="x" placeholder="x" value="x">
+                                </div>
+                                <div class="coord-input">
+                                    <label for="y">Y:</label>
+                                    <input type="text" id="y" placeholder="y" value="y">
+                                </div>
+                            </div>
+                            <button type="button" id="btnGetGPS" class="btn btn-gps"><i class="fas fa-location-crosshairs"></i> Obtenir ma position GPS</button>
+                            <p class="gps-help">X = longitude ; Y = latitude. La saisie manuelle reste possible hors connexion.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="commune_id">ID Commune *</label>
+                            <input type="text" id="commune_id" placeholder="Ex: 302" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="douar">Douar *</label>
+                            <input type="text" id="douar" placeholder="Ex: Douar principal" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boutons Agriculteur -->
+                <div class="form-buttons">
+                    <button type="button" id="btnAjouterAgriculteur" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Ajouter Agriculteur
+                    </button>
+                    <button type="button" id="btnExporterCSVAgriculteur" class="btn btn-secondary">
+                        <i class="fas fa-file-csv"></i> Exporter CSV Agriculteurs
+                    </button>
+                    <button type="button" id="btnExporterWordAgriculteur" class="btn btn-secondary" style="background-color: #2b5797;">
+                        <i class="fas fa-file-word"></i> Exporter Word Agriculteurs
+                    </button>
+                    <button type="button" id="btnExporterPDFAgriculteur" class="btn btn-secondary" style="background-color: #f40f02;">
+                        <i class="fas fa-file-pdf"></i> Exporter PDF Agriculteurs
+                    </button>
+                    <button type="button" id="btnEffacerAgriculteur" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Effacer Formulaire
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Formulaire Coopérative -->
+        <section id="formCooperative" class="form-section">
+            <h2><i class="fas fa-edit"></i> Formulaire d'inscription - Coopératives</h2>
+            
+            <form id="cooperativeForm">
+            <div class="pdca-voice-toolbar" data-voice-toolbar>
+                <label>Langue vocale / لغة الإدخال
+                    <select class="pdca-voice-language" aria-label="Langue de reconnaissance vocale">
+                        <option value="fr">Français</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </label>
+                <button type="button" class="pdca-model-install" data-model-install>⬇ Installer le modèle sur ce téléphone</button>
+                <span class="pdca-voice-status" aria-live="polite">Voix hors connexion : modèle à installer</span>
+            </div>
+
+                <div class="form-grid">
+                    <!-- Colonne 1 -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="nom_cooperative">Nom Coopérative *</label>
+                            <input type="text" id="nom_cooperative" placeholder="Ex: Coopérative Test" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nom_president">Nom Président *</label>
+                            <input type="text" id="nom_president" placeholder="Ex: Président Coopérative" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nombre_adherents">Nombre d'adhérents *</label>
+                            <input type="number" id="nombre_adherents" placeholder="Ex: 34" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dateCreation">Date de création *</label>
+                            <input type="text" id="dateCreation" placeholder="JJ/MM/AAAA (Ex: 03/09/1980)" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fax_cooperative">Fax Coopérative</label>
+                            <input type="text" id="fax_cooperative" placeholder="Ex: 6554323345">
+                        </div>
+                    </div>
+                    
+                    <!-- Colonne 2 -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="tel_president">Téléphone Président *</label>
+                            <input type="text" id="tel_president" placeholder="Ex: 655443345" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fonctionnelle">Fonctionnelle *</label>
+                            <select id="fonctionnelle" required>
+                                <option value="OUI">OUI</option>
+                                <option value="NON">NON</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="conformite_loi_112_12">Conformité Loi 112-12 *</label>
+                            <select id="conformite_loi_112_12" required>
+                                <option value="OUI">OUI</option>
+                                <option value="NON">NON</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="commune_id_coop">ID Commune *</label>
+                            <input type="text" id="commune_id_coop" placeholder="Ex: 303" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Genre *</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="genre_coop" value="m" checked>
+                                    <span class="radio-custom"></span>
+                                    Homme (m)
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="genre_coop" value="f">
+                                    <span class="radio-custom"></span>
+                                    Femme (f)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="filiere">Filière *</label>
+                            <input type="text" id="filiere" placeholder="Ex: 15" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boutons Coopérative -->
+                <div class="form-buttons">
+                    <button type="button" id="btnAjouterCooperative" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Ajouter Coopérative
+                    </button>
+                    <button type="button" id="btnExporterCSVCooperative" class="btn btn-secondary">
+                        <i class="fas fa-file-csv"></i> Exporter CSV Coopératives
+                    </button>
+                    <button type="button" id="btnExporterWordCooperative" class="btn btn-secondary" style="background-color: #2b5797;">
+                        <i class="fas fa-file-word"></i> Exporter Word Coopératives
+                    </button>
+                    <button type="button" id="btnExporterPDFCooperative" class="btn btn-secondary" style="background-color: #f40f02;">
+                        <i class="fas fa-file-pdf"></i> Exporter PDF Coopératives
+                    </button>
+                    <button type="button" id="btnEffacerCooperative" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Effacer Formulaire
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Liste des agriculteurs -->
+        <section id="listAgriculteur" class="list-section active-list">
+            <h2><i class="fas fa-list"></i> Agriculteurs Saisis (<span id="countAgriculteurs">0</span>)</h2>
+            
+            <div class="filters-row"><input id="searchFarmers" type="search" placeholder="Rechercher nom, CIN, téléphone..."><input id="filterFarmerCommune" type="text" placeholder="Filtrer par ID commune"><select id="filterFarmerGender"><option value="">Tous les genres</option><option value="m">Homme</option><option value="f">Femme</option></select></div>
+            <div class="table-container">
+                <table id="agriculteursTable">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>CIN</th>
+                            <th>Genre</th>
+                            <th>Date Naiss.</th>
+                            <th>Téléphone</th>
+                            <th>Commune</th>
+                            <th>Douar</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyAgriculteurs">
+                        <!-- Les lignes seront ajoutées ici par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="table-info">
+                <p id="tableMessageAgriculteurs">Aucun agriculteur saisi pour le moment.</p>
+            </div>
+        </section>
+
+        <!-- Liste des coopératives -->
+        <section id="listCooperative" class="list-section">
+            <h2><i class="fas fa-list"></i> Coopératives Saisies (<span id="countCooperatives">0</span>)</h2>
+            
+            <div class="filters-row"><input id="searchCoops" type="search" placeholder="Rechercher coopérative, président..."><input id="filterCoopCommune" type="text" placeholder="Filtrer par ID commune"><select id="filterCoopStatus"><option value="">Tous les statuts</option><option value="OUI">Fonctionnelle</option><option value="NON">Non fonctionnelle</option></select></div>
+            <div class="table-container">
+                <table id="cooperativesTable">
+                    <thead>
+                        <tr>
+                            <th>Nom Coopérative</th>
+                            <th>Nom Président</th>
+                            <th>Nbr Adhérents</th>
+                            <th>Date Création</th>
+                            <th>Fax</th>
+                            <th>Tél Président</th>
+                            <th>Fonctionnelle</th>
+                            <th>Conformité Loi</th>
+                            <th>Commune ID</th>
+                            <th>Genre</th>
+                            <th>Filière</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyCooperatives">
+                        <!-- Les lignes seront ajoutées ici par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="table-info">
+                <p id="tableMessageCooperatives">Aucune coopérative saisie pour le moment.</p>
+            </div>
+        </section>
+
+        <!-- Statut et informations -->
+        <footer class="footer">
+            <div class="status-bar">
+                <p id="statusMessage">
+                    <i class="fas fa-info-circle"></i> PDCA Collect - Prêt à saisir des données
+                </p>
+            </div>
+            <div class="instructions">
+                <p><i class="fas fa-lightbulb"></i> Sélectionnez le type (Agriculteur/Coopérative) et exportez les données en CSV, Word ou PDF.</p>
+            </div>
+        </footer>
+        </div><!-- /recordsPanel -->
+    </div>
+
+    <!-- Modale pour les messages -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <p id="modalMessage"></p>
+            <button id="modalClose" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+
+    <!-- Bibliothèques pour l'export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/docx@7.7.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <script src="voice.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

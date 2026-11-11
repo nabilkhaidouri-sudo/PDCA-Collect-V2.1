@@ -1,0 +1,4 @@
+// Ajouter dans dependencies { } du module app :
+implementation 'com.alphacephei:vosk-android:0.3.32+'
+implementation 'androidx.core:core-ktx:1.13.1'
+// Ajouter mavenCentral() dans repositories si absent.
